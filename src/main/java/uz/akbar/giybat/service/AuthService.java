@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import uz.akbar.giybat.dto.LoginDto;
+import uz.akbar.giybat.dto.ProfileDto;
 import uz.akbar.giybat.dto.RegistrationDto;
 import uz.akbar.giybat.entity.ProfileEntity;
 import uz.akbar.giybat.enums.GeneralStatus;
@@ -57,7 +59,7 @@ public class AuthService {
         return "Successfully registered!";
     }
 
-    public Object regVerification(Integer profileId) {
+    public String regVerification(Integer profileId) {
         ProfileEntity profile = profileService.getById(profileId);
 
         if (profile.getStatus().equals(GeneralStatus.IN_REGISTRATION)) {
@@ -66,5 +68,23 @@ public class AuthService {
         }
 
         throw new AppBadException("Verification failed!");
+    }
+
+    public ProfileDto login(LoginDto dto) {
+        Optional<ProfileEntity> optional =
+                repository.findByUsernameAndVisibleTrue(dto.getUsername());
+
+        if (optional.isEmpty()) throw new AppBadException("Username or password is incorrect!");
+
+        ProfileEntity profile = optional.get();
+
+        if (!passwordEncoder.matches(dto.getPassword(), profile.getPassword()))
+            throw new AppBadException("Username or password is incorrect!");
+
+        if (!profile.getStatus().equals(GeneralStatus.ACTIVE))
+            throw new AppBadException("Wrong status!");
+
+        // TODO: return response
+        return null;
     }
 }

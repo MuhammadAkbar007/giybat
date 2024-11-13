@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import uz.akbar.giybat.dto.LoginDto;
+import uz.akbar.giybat.dto.ProfileDto;
 import uz.akbar.giybat.dto.RegistrationDto;
 import uz.akbar.giybat.service.AuthService;
 
@@ -29,5 +31,10 @@ public class AuthController {
     @GetMapping("/registration/verification/{profileId}")
     public ResponseEntity<?> regVerification(@PathVariable("profileId") Integer profileId) {
         return ResponseEntity.ok(service.regVerification(profileId));
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<ProfileDto> login(@Valid @RequestBody LoginDto dto) {
+        return ResponseEntity.ok().body(service.login(dto));
     }
 }
