@@ -36,7 +36,6 @@ public class AuthService {
             if (profile.getStatus().equals(GeneralStatus.IN_REGISTRATION)) {
                 profileRoleService.deleteRoles(profile.getId());
                 repository.delete(profile);
-                // send sms or email
             } else {
                 throw new AppBadException("Username already exists!");
             }
@@ -74,9 +73,9 @@ public class AuthService {
         Optional<ProfileEntity> optional =
                 repository.findByUsernameAndVisibleTrue(dto.getUsername());
 
-        if (optional.isEmpty()) throw new AppBadException("Username or password is incorrect!");
-
-        ProfileEntity profile = optional.get();
+        ProfileEntity profile =
+                optional.orElseThrow(
+                        () -> new AppBadException("Username or password is incorrect!"));
 
         if (!passwordEncoder.matches(dto.getPassword(), profile.getPassword()))
             throw new AppBadException("Username or password is incorrect!");

@@ -12,11 +12,14 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
+import lombok.Data;
+
 import uz.akbar.giybat.enums.ProfileRole;
 
 import java.time.LocalDateTime;
 
 /** ProfileRoleEntity */
+@Data
 @Entity
 @Table(name = "profile_role")
 public class ProfileRoleEntity {
@@ -37,44 +40,4 @@ public class ProfileRoleEntity {
     private ProfileEntity profile;
 
     private LocalDateTime createdDate;
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public Integer getProfileId() {
-        return profileId;
-    }
-
-    public void setProfileId(Integer profileId) {
-        this.profileId = profileId;
-    }
-
-    public ProfileRole getRoles() {
-        return roles;
-    }
-
-    public void setRoles(ProfileRole roles) {
-        this.roles = roles;
-    }
-
-    public ProfileEntity getProfile() {
-        return profile;
-    }
-
-    public void setProfile(ProfileEntity profile) {
-        this.profile = profile;
-    }
-
-    public LocalDateTime getCreatedDate() {
-        return createdDate;
-    }
-
-    public void setCreatedDate(LocalDateTime createdDate) {
-        this.createdDate = createdDate;
-    }
 }
