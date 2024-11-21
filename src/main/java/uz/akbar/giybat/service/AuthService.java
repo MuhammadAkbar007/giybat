@@ -1,19 +1,22 @@
 package uz.akbar.giybat.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import uz.akbar.giybat.dto.AppResponse;
 import uz.akbar.giybat.dto.LoginDto;
-import uz.akbar.giybat.dto.ProfileDto;
 import uz.akbar.giybat.dto.RegistrationDto;
 import uz.akbar.giybat.entity.ProfileEntity;
+import uz.akbar.giybat.enums.AppLanguage;
 import uz.akbar.giybat.enums.GeneralStatus;
 import uz.akbar.giybat.enums.ProfileRole;
 import uz.akbar.giybat.exceptions.AppBadException;
 import uz.akbar.giybat.repository.ProfileRepository;
 
 import java.time.LocalDateTime;
+import java.util.Locale;
 import java.util.Optional;
 
 /** AuthService */
@@ -25,8 +28,9 @@ public class AuthService {
     @Autowired private ProfileRoleService profileRoleService;
     @Autowired private EmailService emailService;
     @Autowired private ProfileService profileService;
+    @Autowired private ResourceBundleMessageSource bundleMessage;
 
-    public String registration(RegistrationDto dto) {
+    public AppResponse registration(RegistrationDto dto, AppLanguage lang) {
 
         Optional<ProfileEntity> optional =
                 repository.findByUsernameAndVisibleTrue(dto.getUsername());
@@ -37,7 +41,9 @@ public class AuthService {
                 profileRoleService.deleteRoles(profile.getId());
                 repository.delete(profile);
             } else {
-                throw new AppBadException("Username already exists!");
+                throw new AppBadException(
+                        bundleMessage.getMessage(
+                                "email.phone.exists", null, new Locale(lang.name())));
             }
         }
 
@@ -55,35 +61,46 @@ public class AuthService {
 
         emailService.sendRegistrationEmail(profile.getUsername(), profile.getId());
 
-        return "Successfully registered!";
+        return new AppResponse(
+                bundleMessage.getMessage("email.conform.send", null, new Locale(lang.name())));
     }
 
-    public String regVerification(Integer profileId) {
+    public AppResponse regVerification(Integer profileId, AppLanguage lang) {
         ProfileEntity profile = profileService.getById(profileId);
 
         if (profile.getStatus().equals(GeneralStatus.IN_REGISTRATION)) {
             repository.changeStatus(profileId, GeneralStatus.ACTIVE);
-            return "Verification finished!";
+            return new AppResponse(
+                    bundleMessage.getMessage(
+                            "verification.success", null, new Locale(lang.name())));
         }
 
-        throw new AppBadException("Verification failed!");
+        throw new AppBadException(
+                bundleMessage.getMessage("verification.fail", null, new Locale(lang.name())));
     }
 
-    public ProfileDto login(LoginDto dto) {
+    public AppResponse login(LoginDto dto, AppLanguage lang) {
         Optional<ProfileEntity> optional =
                 repository.findByUsernameAndVisibleTrue(dto.getUsername());
 
         ProfileEntity profile =
                 optional.orElseThrow(
-                        () -> new AppBadException("Username or password is incorrect!"));
+                        () ->
+                                new AppBadException(
+                                        bundleMessage.getMessage(
+                                                "username.password.wrong",
+                                                null,
+                                                new Locale(lang.name()))));
 
         if (!passwordEncoder.matches(dto.getPassword(), profile.getPassword()))
-            throw new AppBadException("Username or password is incorrect!");
+            throw new AppBadException(
+                    bundleMessage.getMessage(
+                            "username.password.wrong", null, new Locale(lang.name())));
 
         if (!profile.getStatus().equals(GeneralStatus.ACTIVE))
             throw new AppBadException("Wrong status!");
 
-        // TODO: return response
-        return null;
+        // TODO: return token
+        return new AppResponse(null);
     }
 }

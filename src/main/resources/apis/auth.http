@@ -1,6 +1,7 @@
 ### Registration
 POST http://localhost:8080/auth/registration
 Content-Type: application/json
+Accept-Language: RU
 
 {
 	"name": "Akbar",
@@ -10,3 +11,4 @@ Content-Type: application/json
 
 ### Registration Verification
 GET http://localhost:8080/auth/registration/verification/5
+Accept-Language: RU
